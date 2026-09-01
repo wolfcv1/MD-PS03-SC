@@ -1,6 +1,6 @@
 ---
 title: "Problem Set 03: Data Wrangling"
-author: "Your Name"
+author: "Cory Wolf"
 date: last-modified
 date-format: "[Last modified on] MMMM DD, YYYY HH:mm:ss zzz"
 format: 
@@ -59,10 +59,11 @@ Examine `txhousing` in the data viewer. You can accomplish this two different wa
 ::: {.callout-important icon="false" collapse="false" title="Problem 1 Answers"}
 ```{r}
 # Type your code and comments inside the code chunk
-
+txhousing %>%
+  slice(n())
 ```
 
--   Delete this and put your text answer here.
+-   Wichita Falls
 :::
 
 ::: {.callout-note icon="false" title="Problem 2"}
@@ -70,7 +71,7 @@ Examine the variable descriptions by typing `?txhousing` in the **console**. Wha
 :::
 
 ::: {.callout-important icon="false" collapse="false" title="Problem 2 Answers"}
--   Delete this and put your text answer here.
+-   Total active listings
 :::
 
 # Data Wrangling Review
@@ -241,7 +242,10 @@ Write a code chunk to remove the inventory variable. Save the results in a data 
 ::: {.callout-important icon="false" collapse="false" title="Problem 3 Answers"}
 ```{r}
 # Type your code and comments inside the code chunk
+txhousing <- txhousing %>%
+  select(-inventory)
 
+txhousing
 ```
 :::
 
@@ -257,6 +261,12 @@ txhousing |>
 ```{r}
 # Type your code and comments inside the code chunk
 
+dallas_sub <- txhousing %>%
+  filter(city == "Dallas", year %in% c(2012, 2013))
+
+dim(dallas_sub)
+
+head(dallas_sub)
 ```
 :::
 
@@ -268,6 +278,10 @@ Add a column to the `dallas_sub` data set called `prct_sold` that calculates the
 ```{r}
 # Type your code and comments inside the code chunk
 
+dallas_sub <- dallas_sub %>% 
+  mutate(prct_sold = (sales / listings) * 100)
+
+tail(dallas_sub)
 ```
 :::
 
@@ -277,8 +291,12 @@ Calculate the **average** percentage of listings that were sold in Dallas **in e
 
 ::: {.callout-important icon="false" collapse="false" title="Problem 6 Answers"}
 ```{r}
-# Type your code and comments inside the code chunk
 
+dallas_summary <- dallas_sub %>%
+  group_by(month) %>%
+  summarize(mean_prct_sold = mean(prct_sold, na.rm = TRUE))
+
+dallas_summary
 ```
 :::
 
@@ -289,7 +307,8 @@ Arrange the `dallas_summary` in `desc`ending order based on the average percenta
 ::: {.callout-important icon="false" collapse="false" title="Problem 7 Answers"}
 ```{r}
 # Type your code and comments inside the code chunk
-
+dallas_summary %>%
+  arrange(desc(mean_prct_sold))
 ```
 :::
 
@@ -322,10 +341,15 @@ In January of 2015, what city had the fewest houses listed for sale? Report the 
 ::: {.callout-important icon="false" collapse="false" title="Problem 9 Answers"}
 ```{r}
 # Type your code and comments inside the code chunk
+txhousing %>%
+  filter(year == 2015, month == 1) %>%
+  group_by(city) %>%
+  summarize(houses = n()) %>%
+  arrange(houses)
 
 ```
 
--   Delete this and put your text answer here.
+-   The first row will give you the city with the fewest houses.
 :::
 
 ::: {.callout-note icon="false" title="Problem 10"}
@@ -335,10 +359,14 @@ In 2012, in which month were the most houses sold in Texas? Report the month wer
 ::: {.callout-important icon="false" collapse="false" title="Problem 10 Answers"}
 ```{r}
 # Type your code and comments inside the code chunk
-
+txhousing %>%
+  filter(year == 2012) %>%
+  group_by(month) %>%
+  summarize(total_sales = sum(sales, na.rm = TRUE)) %>%
+  arrange(desc(total_sales))
 ```
 
--   Delete this and put your text answer here.
+-  Month 8
 :::
 
 ::: {.callout-note icon="false" title="Problem 11"}
@@ -348,7 +376,11 @@ Generate a **single** table that shows the total number of houses sold in **Aust
 ::: {.callout-important icon="false" collapse="false" title="Problem 11 Answers"}
 ```{r}
 # Type your code and comments inside the code chunk
-
+txhousing %>%
+  filter(year %in% c(2000, 2001),
+         city %in% c("Austin", "Dallas")) %>%
+  group_by(city) %>%
+  summarize(total_houses_sold = sum(sales, na.rm = TRUE))
 ```
 :::
 
